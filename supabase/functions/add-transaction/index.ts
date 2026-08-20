@@ -19,7 +19,7 @@
 //     "account": "Nombre de la cuenta",
 //     "amount": 123.45,
 //     "category": "Nombre de la categoría",   // requerido para gasto/ingreso
-//     "transfer_account": "Nombre destino",    // requerido para transferencia
+//     "transfer_account": "Nombre destino",    // requerido para transferencia; alias: "toAccount"
 //     "note": "texto opcional",                // alias aceptado: "description"
 //     "date": "2026-08-20"                     // opcional, default hoy; también acepta
 //   }                                           // un datetime ISO completo (se recorta a la fecha)
@@ -73,6 +73,7 @@ Deno.serve(async (req) => {
     amount?: number
     category?: string
     transfer_account?: string
+    toAccount?: string
     note?: string
     description?: string
     date?: string
@@ -98,7 +99,8 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'account es requerido' }, 400)
   }
 
-  if (type === 'transfer' && !(payload.transfer_account ?? '').trim()) {
+  const transferAccountRaw = payload.transfer_account ?? payload.toAccount
+  if (type === 'transfer' && !(transferAccountRaw ?? '').trim()) {
     return jsonResponse({ error: 'transfer_account es requerido para transferencias' }, 400)
   }
 
@@ -128,7 +130,7 @@ Deno.serve(async (req) => {
 
   let transferAccountId: string | null = null
   if (type === 'transfer') {
-    const transferAccountName = (payload.transfer_account ?? '').trim()
+    const transferAccountName = (transferAccountRaw ?? '').trim()
     transferAccountId = findAccountId(transferAccountName)
     if (!transferAccountId) {
       return jsonResponse(
