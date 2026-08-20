@@ -20,9 +20,9 @@
 //     "amount": 123.45,
 //     "category": "Nombre de la categoría",   // requerido para gasto/ingreso
 //     "transfer_account": "Nombre destino",    // requerido para transferencia
-//     "note": "texto opcional",
-//     "date": "2026-08-20"                     // opcional, default hoy
-//   }
+//     "note": "texto opcional",                // alias aceptado: "description"
+//     "date": "2026-08-20"                     // opcional, default hoy; también acepta
+//   }                                           // un datetime ISO completo (se recorta a la fecha)
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
     category?: string
     transfer_account?: string
     note?: string
+    description?: string
     date?: string
   }
   try {
@@ -161,8 +162,8 @@ Deno.serve(async (req) => {
       category_id: categoryId,
       amount,
       type,
-      date: payload.date?.trim() || new Date().toISOString().slice(0, 10),
-      note: payload.note?.trim() || null,
+      date: payload.date?.trim().slice(0, 10) || new Date().toISOString().slice(0, 10),
+      note: (payload.note ?? payload.description)?.trim() || null,
     })
     .select()
     .single()
