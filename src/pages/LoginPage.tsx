@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 type Mode = 'signin' | 'signup' | 'magic-link'
 
 export function LoginPage() {
-  const { signInWithPassword, signUpWithPassword, signInWithMagicLink } = useAuth()
+  const { session, signInWithPassword, signUpWithPassword, signInWithMagicLink } = useAuth()
   const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,6 +38,10 @@ export function LoginPage() {
     } else if (mode === 'magic-link') {
       setMessage('Te enviamos un enlace mágico a tu correo.')
     }
+  }
+
+  if (session) {
+    return <Navigate to="/" replace />
   }
 
   return (
