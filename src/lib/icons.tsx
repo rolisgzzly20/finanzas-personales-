@@ -8,6 +8,7 @@ import {
   HeartPulse,
   Home,
   Clapperboard,
+  Gamepad2,
   MoreHorizontal,
   type LucideIcon,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   'heart-pulse': HeartPulse,
   home: Home,
   clapperboard: Clapperboard,
+  'gamepad-2': Gamepad2,
   'more-horizontal': MoreHorizontal,
 }
 

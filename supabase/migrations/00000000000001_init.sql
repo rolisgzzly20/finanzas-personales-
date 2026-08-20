@@ -125,15 +125,11 @@ as $$
 begin
   insert into public.categories (user_id, name, color, icon)
   values
-    (auth.uid(), 'Alimentos', '#f59e0b', 'utensils'),
-    (auth.uid(), 'Gas', '#ef4444', 'fuel'),
+    (auth.uid(), 'Comida', '#f59e0b', 'utensils'),
     (auth.uid(), 'Salidas', '#a855f7', 'party-popper'),
+    (auth.uid(), 'Gasolina', '#f97316', 'fuel'),
+    (auth.uid(), 'Hobbies', '#22c55e', 'gamepad-2'),
     (auth.uid(), 'Gustos', '#ec4899', 'sparkles'),
-    (auth.uid(), 'Esenciales', '#22c55e', 'shopping-cart'),
-    (auth.uid(), 'Transporte', '#3b82f6', 'car'),
-    (auth.uid(), 'Salud', '#14b8a6', 'heart-pulse'),
-    (auth.uid(), 'Hogar', '#f97316', 'home'),
-    (auth.uid(), 'Entretenimiento', '#8b5cf6', 'clapperboard'),
     (auth.uid(), 'Otros', '#6b7280', 'more-horizontal')
   on conflict (user_id, name) do nothing;
 end;
