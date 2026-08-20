@@ -1,13 +1,28 @@
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import type { MockCategorySpending } from '../../lib/mockData'
 import { formatCurrency } from '../../lib/format'
 
+interface CategorySpendingItem {
+  id: string
+  name: string
+  color: string
+  amount: number
+}
+
 interface CategorySpendingChartProps {
-  data: MockCategorySpending[]
+  data: CategorySpendingItem[]
 }
 
 export function CategorySpendingChart({ data }: CategorySpendingChartProps) {
   const sorted = [...data].sort((a, b) => b.amount - a.amount)
+
+  if (sorted.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-4">
+        <h2 className="mb-4 text-sm font-medium text-gray-300">Gastos por categoría</h2>
+        <p className="text-sm text-gray-500">Aún no hay gastos este mes.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">

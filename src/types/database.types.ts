@@ -37,6 +37,7 @@ export interface Database {
           avatar_url?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       accounts: {
         Row: {
@@ -63,6 +64,7 @@ export interface Database {
           initial_balance?: number
           created_at?: string
         }
+        Relationships: []
       }
       categories: {
         Row: {
@@ -89,6 +91,7 @@ export interface Database {
           icon?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       transactions: {
         Row: {
@@ -127,6 +130,7 @@ export interface Database {
           note?: string | null
           created_at?: string
         }
+        Relationships: []
       }
     }
     Views: {
@@ -139,6 +143,7 @@ export interface Database {
           initial_balance: number
           balance: number
         }
+        Relationships: []
       }
     }
     Functions: {

@@ -95,5 +95,10 @@ alter view public.account_balances set (security_invoker = on);
 -- ============================================================
 -- Realtime: let clients subscribe to postgres_changes on transactions so
 -- the app updates itself when a row is inserted from outside the app.
+-- REPLICA IDENTITY FULL is required for UPDATE/DELETE events — without it,
+-- Postgres only includes primary-key columns in the old row, which isn't
+-- enough for Realtime to evaluate a `user_id=eq.<id>` filter on those
+-- events (INSERT is unaffected since it filters on the new row instead).
 -- ============================================================
+alter table public.transactions replica identity full;
 alter publication supabase_realtime add table public.transactions;

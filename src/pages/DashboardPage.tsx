@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext'
 import { DashboardHeader } from '../components/dashboard/DashboardHeader'
 import { SummaryCard } from '../components/dashboard/SummaryCard'
 import { CategorySpendingChart } from '../components/dashboard/CategorySpendingChart'
-import { MOCK_MONTH_SUMMARY } from '../lib/mockData'
+import { useAccountBalances } from '../hooks/useAccountBalances'
+import { useMonthSummary } from '../hooks/useMonthSummary'
+import { useRealtimeTransactions } from '../hooks/useRealtimeTransactions'
 import { formatCurrency } from '../lib/format'
 
 export function DashboardPage() {
@@ -12,6 +14,10 @@ export function DashboardPage() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
+
+  useRealtimeTransactions(user?.id)
+  const { data: accountBalances, isLoading: accountsLoading } = useAccountBalances()
+  const { data: summary, isLoading: summaryLoading } = useMonthSummary(year, month)
 
   function goToPrevMonth() {
     if (month === 0) {
@@ -31,7 +37,17 @@ export function DashboardPage() {
     }
   }
 
-  const summary = MOCK_MONTH_SUMMARY
+  if (accountsLoading || summaryLoading || !summary) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-bg text-sm text-gray-400">
+        Cargando…
+      </div>
+    )
+  }
+
+  const totalAvailable = (accountBalances ?? [])
+    .filter((a) => a.type === 'debit')
+    .reduce((sum, a) => sum + Number(a.balance), 0)
   const savingsThisMonth = summary.incomeThisMonth - summary.spentThisMonth
 
   return (
@@ -48,7 +64,7 @@ export function DashboardPage() {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <SummaryCard
             label="Total disponible"
-            value={formatCurrency(summary.totalAvailable)}
+            value={formatCurrency(totalAvailable)}
             icon={Wallet}
           />
           <SummaryCard
