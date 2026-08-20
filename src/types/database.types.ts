@@ -13,7 +13,7 @@ export type Json =
   | Json[]
 
 export type AccountType = 'debit' | 'credit' | 'cash'
-export type TransactionType = 'income' | 'expense'
+export type TransactionType = 'income' | 'expense' | 'transfer'
 
 export interface Database {
   public: {
@@ -95,6 +95,7 @@ export interface Database {
           id: string
           user_id: string
           account_id: string
+          transfer_account_id: string | null
           category_id: string | null
           amount: number
           type: TransactionType
@@ -106,6 +107,7 @@ export interface Database {
           id?: string
           user_id: string
           account_id: string
+          transfer_account_id?: string | null
           category_id?: string | null
           amount: number
           type: TransactionType
@@ -117,6 +119,7 @@ export interface Database {
           id?: string
           user_id?: string
           account_id?: string
+          transfer_account_id?: string | null
           category_id?: string | null
           amount?: number
           type?: TransactionType
