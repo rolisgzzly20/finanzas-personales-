@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-type Mode = 'signin' | 'signup' | 'magic-link'
+type Mode = 'signin' | 'magic-link'
 
 export function LoginPage() {
-  const { session, signInWithPassword, signUpWithPassword, signInWithMagicLink } = useAuth()
+  const { session, signInWithPassword, signInWithMagicLink } = useAuth()
   const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,11 +20,7 @@ export function LoginPage() {
     setSubmitting(true)
 
     const result =
-      mode === 'signin'
-        ? await signInWithPassword(email, password)
-        : mode === 'signup'
-          ? await signUpWithPassword(email, password)
-          : await signInWithMagicLink(email)
+      mode === 'signin' ? await signInWithPassword(email, password) : await signInWithMagicLink(email)
 
     setSubmitting(false)
 
@@ -33,9 +29,7 @@ export function LoginPage() {
       return
     }
 
-    if (mode === 'signup') {
-      setMessage('Cuenta creada. Revisa tu correo para confirmar el registro.')
-    } else if (mode === 'magic-link') {
+    if (mode === 'magic-link') {
       setMessage('Te enviamos un enlace mágico a tu correo.')
     }
   }
@@ -49,9 +43,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
         <h1 className="mb-1 text-xl font-semibold text-white">Finanzas</h1>
         <p className="mb-6 text-sm text-gray-400">
-          {mode === 'signin' && 'Inicia sesión en tu cuenta'}
-          {mode === 'signup' && 'Crea una cuenta nueva'}
-          {mode === 'magic-link' && 'Inicia sesión con un enlace mágico'}
+          {mode === 'signin' ? 'Inicia sesión en tu cuenta' : 'Inicia sesión con un enlace mágico'}
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -84,23 +76,11 @@ export function LoginPage() {
             disabled={submitting}
             className="mt-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-black disabled:opacity-50"
           >
-            {mode === 'signin' && 'Entrar'}
-            {mode === 'signup' && 'Registrarme'}
-            {mode === 'magic-link' && 'Enviar enlace'}
+            {mode === 'signin' ? 'Entrar' : 'Enviar enlace'}
           </button>
         </form>
 
         <div className="mt-4 flex flex-col gap-1 text-center text-sm text-gray-400">
-          {mode === 'signin' ? (
-            <button onClick={() => setMode('signup')} className="hover:text-white">
-              ¿No tienes cuenta? Regístrate
-            </button>
-          ) : (
-            <button onClick={() => setMode('signin')} className="hover:text-white">
-              ¿Ya tienes cuenta? Inicia sesión
-            </button>
-          )}
-
           {mode !== 'magic-link' ? (
             <button onClick={() => setMode('magic-link')} className="hover:text-white">
               Usar enlace mágico en su lugar

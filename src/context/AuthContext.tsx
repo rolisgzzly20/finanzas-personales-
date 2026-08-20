@@ -15,7 +15,6 @@ interface AuthContextValue {
   passwordRecovery: boolean
   clearPasswordRecovery: () => void
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
-  signUpWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signInWithMagicLink: (email: string) => Promise<{ error: string | null }>
   updatePassword: (password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
@@ -52,11 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
-  async function signUpWithPassword(email: string, password: string) {
-    const { error } = await supabase.auth.signUp({ email, password })
-    return { error: error?.message ?? null }
-  }
-
   async function signInWithMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -86,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     passwordRecovery,
     clearPasswordRecovery,
     signInWithPassword,
-    signUpWithPassword,
     signInWithMagicLink,
     updatePassword,
     signOut,
