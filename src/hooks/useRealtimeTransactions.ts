@@ -20,6 +20,7 @@ export function useRealtimeTransactions(userId: string | undefined) {
         { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` },
         () => {
           void queryClient.invalidateQueries({ queryKey: ['transactions-range'] })
+          void queryClient.invalidateQueries({ queryKey: ['transactions'] })
           void queryClient.invalidateQueries({ queryKey: ['account-balances'] })
         },
       )

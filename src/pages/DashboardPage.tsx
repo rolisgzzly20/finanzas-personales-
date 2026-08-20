@@ -6,7 +6,6 @@ import { SummaryCard } from '../components/dashboard/SummaryCard'
 import { CategorySpendingChart } from '../components/dashboard/CategorySpendingChart'
 import { useAccountBalances } from '../hooks/useAccountBalances'
 import { useMonthSummary } from '../hooks/useMonthSummary'
-import { useRealtimeTransactions } from '../hooks/useRealtimeTransactions'
 import { formatCurrency } from '../lib/format'
 
 export function DashboardPage() {
@@ -15,7 +14,6 @@ export function DashboardPage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
 
-  useRealtimeTransactions(user?.id)
   const { data: accountBalances, isLoading: accountsLoading } = useAccountBalances()
   const { data: summary, isLoading: summaryLoading } = useMonthSummary(year, month)
 
@@ -38,11 +36,7 @@ export function DashboardPage() {
   }
 
   if (accountsLoading || summaryLoading || !summary) {
-    return (
-      <div className="flex min-h-svh items-center justify-center bg-bg text-sm text-gray-400">
-        Cargando…
-      </div>
-    )
+    return <p className="text-sm text-gray-400">Cargando…</p>
   }
 
   const totalAvailable = (accountBalances ?? [])
@@ -51,57 +45,51 @@ export function DashboardPage() {
   const savingsThisMonth = summary.incomeThisMonth - summary.spentThisMonth
 
   return (
-    <div className="min-h-svh bg-bg p-4 pb-10 text-white sm:p-6">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <DashboardHeader
-          year={year}
-          month={month}
-          transactionCount={summary.transactionCount}
-          onPrevMonth={goToPrevMonth}
-          onNextMonth={goToNextMonth}
+    <>
+      <DashboardHeader
+        year={year}
+        month={month}
+        transactionCount={summary.transactionCount}
+        onPrevMonth={goToPrevMonth}
+        onNextMonth={goToNextMonth}
+      />
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <SummaryCard label="Total disponible" value={formatCurrency(totalAvailable)} icon={Wallet} />
+        <SummaryCard
+          label="Gastado este mes"
+          value={formatCurrency(summary.spentThisMonth)}
+          icon={TrendingDown}
+          valueClassName="text-negative"
+          changePct={summary.spentChangePct}
+          increaseIsGood={false}
         />
-
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <SummaryCard
-            label="Total disponible"
-            value={formatCurrency(totalAvailable)}
-            icon={Wallet}
-          />
-          <SummaryCard
-            label="Gastado este mes"
-            value={formatCurrency(summary.spentThisMonth)}
-            icon={TrendingDown}
-            valueClassName="text-negative"
-            changePct={summary.spentChangePct}
-            increaseIsGood={false}
-          />
-          <SummaryCard
-            label="Ingresos del mes"
-            value={formatCurrency(summary.incomeThisMonth)}
-            icon={TrendingUp}
-            valueClassName="text-positive"
-            changePct={summary.incomeChangePct}
-            increaseIsGood={true}
-          />
-          <SummaryCard
-            label="Ahorro del mes"
-            value={formatCurrency(savingsThisMonth)}
-            icon={PiggyBank}
-            valueClassName={savingsThisMonth >= 0 ? 'text-positive' : 'text-negative'}
-            changePct={summary.savingsChangePct}
-            increaseIsGood={true}
-          />
-        </div>
-
-        <CategorySpendingChart data={summary.categorySpending} />
-
-        <button
-          onClick={() => void signOut()}
-          className="self-start text-xs text-gray-500 hover:text-gray-300"
-        >
-          Cerrar sesión ({user?.email})
-        </button>
+        <SummaryCard
+          label="Ingresos del mes"
+          value={formatCurrency(summary.incomeThisMonth)}
+          icon={TrendingUp}
+          valueClassName="text-positive"
+          changePct={summary.incomeChangePct}
+          increaseIsGood={true}
+        />
+        <SummaryCard
+          label="Ahorro del mes"
+          value={formatCurrency(savingsThisMonth)}
+          icon={PiggyBank}
+          valueClassName={savingsThisMonth >= 0 ? 'text-positive' : 'text-negative'}
+          changePct={summary.savingsChangePct}
+          increaseIsGood={true}
+        />
       </div>
-    </div>
+
+      <CategorySpendingChart data={summary.categorySpending} />
+
+      <button
+        onClick={() => void signOut()}
+        className="self-start text-xs text-gray-500 hover:text-gray-300"
+      >
+        Cerrar sesión ({user?.email})
+      </button>
+    </>
   )
 }
