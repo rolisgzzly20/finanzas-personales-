@@ -39,9 +39,7 @@ export function DashboardPage() {
     return <p className="text-sm text-gray-400">Cargando…</p>
   }
 
-  const totalAvailable = (accountBalances ?? [])
-    .filter((a) => a.type === 'debit')
-    .reduce((sum, a) => sum + Number(a.balance), 0)
+  const totalAvailable = (accountBalances ?? []).reduce((sum, a) => sum + Number(a.balance), 0)
   const savingsThisMonth = summary.incomeThisMonth - summary.spentThisMonth
 
   return (
