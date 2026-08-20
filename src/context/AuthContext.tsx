@@ -12,9 +12,12 @@ interface AuthContextValue {
   session: Session | null
   user: User | null
   loading: boolean
+  passwordRecovery: boolean
+  clearPasswordRecovery: () => void
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signUpWithPassword: (email: string, password: string) => Promise<{ error: string | null }>
   signInWithMagicLink: (email: string) => Promise<{ error: string | null }>
+  updatePassword: (password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -23,6 +26,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -34,6 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(newSession)
       if (event === 'SIGNED_IN') {
         void supabase.rpc('seed_default_categories')
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true)
       }
     })
 
@@ -58,6 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
+  async function updatePassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (!error) setPasswordRecovery(false)
+    return { error: error?.message ?? null }
+  }
+
+  function clearPasswordRecovery() {
+    setPasswordRecovery(false)
+  }
+
   async function signOut() {
     await supabase.auth.signOut()
   }
@@ -66,9 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user: session?.user ?? null,
     loading,
+    passwordRecovery,
+    clearPasswordRecovery,
     signInWithPassword,
     signUpWithPassword,
     signInWithMagicLink,
+    updatePassword,
     signOut,
   }
 
