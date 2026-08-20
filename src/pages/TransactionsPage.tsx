@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useTransactions } from '../hooks/useTransactions'
+import { Trash2 } from 'lucide-react'
+import { useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useAccountBalances } from '../hooks/useAccountBalances'
 import { formatCurrency, formatDate } from '../lib/format'
@@ -18,6 +19,7 @@ export function TransactionsPage() {
   const { data: transactions, isLoading: transactionsLoading } = useTransactions()
   const { data: categories } = useCategories()
   const { data: accounts } = useAccountBalances()
+  const deleteTransaction = useDeleteTransaction()
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -122,10 +124,23 @@ export function TransactionsPage() {
                   {t.note ? ` · ${t.note}` : ''}
                 </span>
               </div>
-              <span className={`text-sm font-medium ${amountColor}`}>
-                {sign}
-                {formatCurrency(Number(t.amount))}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-medium ${amountColor}`}>
+                  {sign}
+                  {formatCurrency(Number(t.amount))}
+                </span>
+                <button
+                  onClick={() => {
+                    if (confirm('¿Borrar este movimiento?')) {
+                      deleteTransaction.mutate(t.id)
+                    }
+                  }}
+                  aria-label="Borrar movimiento"
+                  className="text-gray-600 hover:text-negative"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           )
         })}
