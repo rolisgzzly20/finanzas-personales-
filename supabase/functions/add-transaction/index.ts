@@ -39,6 +39,16 @@ function jsonResponse(body: unknown, status: number) {
   })
 }
 
+// Strips accents/diacritics before comparing so a misplaced or missing
+// accent from the Shortcut (e.g. "Debíto" vs "Débito") still matches.
+function normalize(s: string) {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405)
@@ -73,7 +83,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Invalid JSON body' }, 400)
   }
 
-  const type = TYPE_MAP[(payload.type ?? '').trim().toLowerCase()]
+  const type = TYPE_MAP[normalize(payload.type ?? '')]
   if (!type) {
     return jsonResponse({ error: `type debe ser uno de: ${Object.keys(TYPE_MAP).join(', ')}` }, 400)
   }
@@ -104,7 +114,7 @@ Deno.serve(async (req) => {
   }
 
   function findAccountId(name: string): string | null {
-    const match = accounts?.find((a) => a.name.toLowerCase() === name.trim().toLowerCase())
+    const match = accounts?.find((a) => normalize(a.name) === normalize(name))
     return match?.id ?? null
   }
 
@@ -143,7 +153,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: `Error leyendo categorías: ${categoriesError.message}` }, 500)
     }
 
-    const match = categories?.find((c) => c.name.toLowerCase() === categoryName.toLowerCase())
+    const match = categories?.find((c) => normalize(c.name) === normalize(categoryName))
     if (!match) {
       return jsonResponse(
         { error: `No encontré la categoría "${categoryName}". Categorías disponibles: ${categories?.map((c) => c.name).join(', ')}` },
