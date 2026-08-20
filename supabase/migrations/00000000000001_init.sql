@@ -112,9 +112,11 @@ create policy "Categories are deletable by owner"
   on public.categories for delete
   using (auth.uid() = user_id);
 
--- Seed a default category set for a user (called after signup from the client,
--- or manually per-user). Kept as a function so the client controls the timing.
-create function public.seed_default_categories(target_user_id uuid)
+-- Seed a default category set for the calling user (called after signup from
+-- the client). SECURITY DEFINER bypasses RLS, so it must derive the user from
+-- auth.uid() rather than trust a caller-supplied id — otherwise any
+-- authenticated user could seed categories into another user's account.
+create function public.seed_default_categories()
 returns void
 language plpgsql
 security definer
@@ -123,16 +125,16 @@ as $$
 begin
   insert into public.categories (user_id, name, color, icon)
   values
-    (target_user_id, 'Alimentos', '#f59e0b', 'utensils'),
-    (target_user_id, 'Gas', '#ef4444', 'fuel'),
-    (target_user_id, 'Salidas', '#a855f7', 'party-popper'),
-    (target_user_id, 'Gustos', '#ec4899', 'sparkles'),
-    (target_user_id, 'Esenciales', '#22c55e', 'shopping-cart'),
-    (target_user_id, 'Transporte', '#3b82f6', 'car'),
-    (target_user_id, 'Salud', '#14b8a6', 'heart-pulse'),
-    (target_user_id, 'Hogar', '#f97316', 'home'),
-    (target_user_id, 'Entretenimiento', '#8b5cf6', 'clapperboard'),
-    (target_user_id, 'Otros', '#6b7280', 'more-horizontal')
+    (auth.uid(), 'Alimentos', '#f59e0b', 'utensils'),
+    (auth.uid(), 'Gas', '#ef4444', 'fuel'),
+    (auth.uid(), 'Salidas', '#a855f7', 'party-popper'),
+    (auth.uid(), 'Gustos', '#ec4899', 'sparkles'),
+    (auth.uid(), 'Esenciales', '#22c55e', 'shopping-cart'),
+    (auth.uid(), 'Transporte', '#3b82f6', 'car'),
+    (auth.uid(), 'Salud', '#14b8a6', 'heart-pulse'),
+    (auth.uid(), 'Hogar', '#f97316', 'home'),
+    (auth.uid(), 'Entretenimiento', '#8b5cf6', 'clapperboard'),
+    (auth.uid(), 'Otros', '#6b7280', 'more-horizontal')
   on conflict (user_id, name) do nothing;
 end;
 $$;
