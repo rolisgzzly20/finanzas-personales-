@@ -12,7 +12,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type AccountType = 'debit' | 'credit' | 'cash'
+export type AccountType = 'debit' | 'credit' | 'cash' | 'savings'
 export type TransactionType = 'income' | 'expense' | 'transfer'
 
 export interface Database {

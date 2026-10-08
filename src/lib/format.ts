@@ -35,3 +35,12 @@ export function formatDate(dateStr: string) {
 }
 
 export { MONTH_LABELS }
+
+// Supabase/PostgREST errors are plain objects with a `message`, not Error
+// instances, so `instanceof Error` alone would drop the real reason.
+export function errorMessage(err: unknown, fallback: string) {
+  if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string' && err.message) {
+    return err.message
+  }
+  return fallback
+}

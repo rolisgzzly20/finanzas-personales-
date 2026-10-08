@@ -28,7 +28,7 @@ export function ResetPasswordPage() {
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
+      <div className="w-full max-w-sm rounded-2xl bg-surface p-6">
         <h1 className="mb-1 text-xl font-semibold text-white">Nueva contraseña</h1>
         <p className="mb-6 text-sm text-gray-400">Elige una contraseña nueva para tu cuenta.</p>
 
@@ -40,7 +40,7 @@ export function ResetPasswordPage() {
             placeholder="Contraseña nueva"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent/60"
           />
           <input
             type="password"
@@ -49,7 +49,7 @@ export function ResetPasswordPage() {
             placeholder="Confirma la contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent/60"
           />
 
           {error && <p className="text-sm text-negative">{error}</p>}
@@ -57,7 +57,7 @@ export function ResetPasswordPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="mt-1 rounded-xl bg-accent px-3 py-2.5 text-sm font-medium text-white disabled:opacity-50"
           >
             Guardar contraseña
           </button>

@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { TransactionsPage } from './pages/TransactionsPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { SavingsPage } from './pages/SavingsPage'
 
 const queryClient = new QueryClient()
 
@@ -29,6 +30,7 @@ function AppRoutes() {
       >
         <Route path="/" element={<DashboardPage />} />
         <Route path="/movimientos" element={<TransactionsPage />} />
+        <Route path="/ahorro" element={<SavingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

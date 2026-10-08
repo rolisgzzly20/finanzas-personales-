@@ -1,21 +1,24 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { PiggyBank, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
 import { DashboardHeader } from '../components/dashboard/DashboardHeader'
-import { SummaryCard } from '../components/dashboard/SummaryCard'
-import { CategorySpendingChart } from '../components/dashboard/CategorySpendingChart'
+import { StatCard } from '../components/dashboard/StatCard'
+import { DailySpendingChart } from '../components/dashboard/DailySpendingChart'
+import { SpendingFlow } from '../components/dashboard/SpendingFlow'
 import { useAccountBalances } from '../hooks/useAccountBalances'
 import { useMonthSummary } from '../hooks/useMonthSummary'
+import { useSavings } from '../hooks/useSavings'
 import { formatCurrency } from '../lib/format'
+import { COLORS } from '../lib/visuals'
 
 export function DashboardPage() {
-  const { user, signOut } = useAuth()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
 
   const { data: accountBalances, isLoading: accountsLoading } = useAccountBalances()
   const { data: summary, isLoading: summaryLoading } = useMonthSummary(year, month)
+  const savings = useSavings()
 
   function goToPrevMonth() {
     if (month === 0) {
@@ -39,8 +42,9 @@ export function DashboardPage() {
     return <p className="text-sm text-gray-400">Cargando…</p>
   }
 
-  const totalAvailable = (accountBalances ?? []).reduce((sum, a) => sum + Number(a.balance), 0)
-  const savingsThisMonth = summary.incomeThisMonth - summary.spentThisMonth
+  // Savings is money set aside, so it's not part of what's available to spend.
+  const spendable = (accountBalances ?? []).filter((a) => a.type !== 'savings')
+  const totalAvailable = spendable.reduce((sum, a) => sum + Number(a.balance), 0)
 
   return (
     <>
@@ -53,41 +57,59 @@ export function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <SummaryCard label="Total disponible" value={formatCurrency(totalAvailable)} icon={Wallet} />
-        <SummaryCard
-          label="Gastado este mes"
+        <StatCard
+          label="Total disponible"
+          value={formatCurrency(totalAvailable)}
+          icon={Wallet}
+          color={COLORS.positive}
+          caption={`En ${spendable.length} cuentas`}
+        />
+        <StatCard
+          label="Gastado"
           value={formatCurrency(summary.spentThisMonth)}
           icon={TrendingDown}
-          valueClassName="text-negative"
+          color={COLORS.negative}
           changePct={summary.spentChangePct}
           increaseIsGood={false}
         />
-        <SummaryCard
-          label="Ingresos del mes"
+        <StatCard
+          label="Ingresos"
           value={formatCurrency(summary.incomeThisMonth)}
           icon={TrendingUp}
-          valueClassName="text-positive"
+          color={COLORS.info}
           changePct={summary.incomeChangePct}
-          increaseIsGood={true}
         />
-        <SummaryCard
-          label="Ahorro del mes"
-          value={formatCurrency(savingsThisMonth)}
-          icon={PiggyBank}
-          valueClassName={savingsThisMonth >= 0 ? 'text-positive' : 'text-negative'}
-          changePct={summary.savingsChangePct}
-          increaseIsGood={true}
-        />
+        <Link to="/ahorro" className="rounded-2xl transition-opacity hover:opacity-85">
+          <StatCard
+            label="Ahorro"
+            value={savings.account ? formatCurrency(Number(savings.account.balance)) : 'Configurar'}
+            icon={PiggyBank}
+            color={COLORS.warning}
+            valueClassName={savings.account ? 'text-white' : 'text-gray-500'}
+            caption={
+              savings.account && savings.change30d !== 0 ? (
+                <span className={savings.change30d > 0 ? 'text-positive' : 'text-negative'}>
+                  {savings.change30d > 0 ? '+' : '-'}
+                  {formatCurrency(Math.abs(savings.change30d))}
+                  <span className="text-gray-500"> en 30 días</span>
+                </span>
+              ) : (
+                'Ver detalle'
+              )
+            }
+          />
+        </Link>
       </div>
 
-      <CategorySpendingChart data={summary.categorySpending} />
+      <SpendingFlow
+        year={year}
+        month={month}
+        categories={summary.categorySpending}
+        categoryNotes={summary.categoryNotes}
+        income={summary.incomeThisMonth}
+      />
 
-      <button
-        onClick={() => void signOut()}
-        className="self-start text-xs text-gray-500 hover:text-gray-300"
-      >
-        Cerrar sesión ({user?.email})
-      </button>
+      <DailySpendingChart year={year} month={month} daily={summary.dailySpending} />
     </>
   )
 }

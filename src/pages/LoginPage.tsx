@@ -40,7 +40,7 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6">
+      <div className="w-full max-w-sm rounded-2xl bg-surface p-6">
         <h1 className="mb-1 text-xl font-semibold text-white">Finanzas</h1>
         <p className="mb-6 text-sm text-gray-400">
           {mode === 'signin' ? 'Inicia sesión en tu cuenta' : 'Inicia sesión con un enlace mágico'}
@@ -53,7 +53,7 @@ export function LoginPage() {
             placeholder="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent/60"
           />
 
           {mode !== 'magic-link' && (
@@ -64,7 +64,7 @@ export function LoginPage() {
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+              className="rounded-xl border border-border bg-surface-hover px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-accent/60"
             />
           )}
 
@@ -74,7 +74,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="mt-1 rounded-xl bg-accent px-3 py-2.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {mode === 'signin' ? 'Entrar' : 'Enviar enlace'}
           </button>

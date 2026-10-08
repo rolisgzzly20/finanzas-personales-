@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabaseClient'
+import type { TransactionType } from '../types/database.types'
 
 export function useTransactions() {
   return useQuery({
@@ -12,6 +13,33 @@ export function useTransactions() {
         .order('created_at', { ascending: false })
       if (error) throw error
       return data
+    },
+  })
+}
+
+export interface NewTransaction {
+  user_id: string
+  type: TransactionType
+  amount: number
+  account_id: string
+  transfer_account_id: string | null
+  category_id: string | null
+  date: string
+  note: string | null
+}
+
+export function useAddTransaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (tx: NewTransaction) => {
+      const { error } = await supabase.from('transactions').insert(tx)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      void queryClient.invalidateQueries({ queryKey: ['transactions-range'] })
+      void queryClient.invalidateQueries({ queryKey: ['account-balances'] })
     },
   })
 }

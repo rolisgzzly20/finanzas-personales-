@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useAccountBalances } from '../hooks/useAccountBalances'
-import { formatCurrency, formatDate } from '../lib/format'
+import { Card } from '../components/ui/Card'
+import { TransactionRow } from '../components/transactions/TransactionRow'
 import type { TransactionType } from '../types/database.types'
 
 type TypeFilter = 'all' | TransactionType
@@ -22,7 +23,9 @@ export function TransactionsPage() {
   const deleteTransaction = useDeleteTransaction()
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  // The dashboard's flow chart links here with ?categoria=<id>.
+  const [searchParams] = useSearchParams()
+  const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get('categoria') ?? 'all')
   const [accountFilter, setAccountFilter] = useState<string>('all')
 
   const categoryById = useMemo(() => new Map((categories ?? []).map((c) => [c.id, c])), [categories])
@@ -48,19 +51,25 @@ export function TransactionsPage() {
     return <p className="text-sm text-gray-400">Cargando…</p>
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-semibold text-white">Movimientos</h1>
+  const selectClass =
+    'rounded-xl bg-surface px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-accent/60'
 
-      <div className="flex flex-wrap gap-2">
+  return (
+    <>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-[28px]">Movimientos</h1>
+        <p className="text-sm text-gray-500">{filtered.length} {filtered.length === 1 ? 'movimiento' : 'movimientos'}</p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         {TYPE_FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => selectType(f.value)}
-            className={`rounded-xl px-3 py-1.5 text-sm transition-colors ${
+            className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${
               typeFilter === f.value
-                ? 'bg-white text-black'
-                : 'border border-border bg-surface text-gray-300 hover:text-white'
+                ? 'bg-accent/15 text-accent'
+                : 'bg-surface text-gray-400 hover:text-white'
             }`}
           >
             {f.label}
@@ -70,11 +79,7 @@ export function TransactionsPage() {
 
       <div className="flex flex-wrap gap-2">
         {typeFilter !== 'transfer' && (
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-xl border border-border bg-surface px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-500"
-          >
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className={selectClass}>
             <option value="all">Todas las categorías</option>
             {(categories ?? []).map((c) => (
               <option key={c.id} value={c.id}>
@@ -84,11 +89,7 @@ export function TransactionsPage() {
           </select>
         )}
 
-        <select
-          value={accountFilter}
-          onChange={(e) => setAccountFilter(e.target.value)}
-          className="rounded-xl border border-border bg-surface px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-500"
-        >
+        <select value={accountFilter} onChange={(e) => setAccountFilter(e.target.value)} className={selectClass}>
           <option value="all">Todas las cuentas</option>
           {(accounts ?? []).map((a) => (
             <option key={a.account_id} value={a.account_id}>
@@ -98,53 +99,26 @@ export function TransactionsPage() {
         </select>
       </div>
 
-      <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-surface">
-        {filtered.length === 0 && (
-          <p className="p-6 text-center text-sm text-gray-500">No hay movimientos con estos filtros.</p>
+      <Card>
+        {filtered.length === 0 ? (
+          <p className="py-6 text-center text-sm text-gray-500">No hay movimientos con estos filtros.</p>
+        ) : (
+          <div className="-my-3 divide-y divide-border">
+            {filtered.map((t) => (
+              <TransactionRow
+                key={t.id}
+                transaction={t}
+                category={t.category_id ? categoryById.get(t.category_id) : undefined}
+                accountName={accountById.get(t.account_id)?.name ?? '?'}
+                transferAccountName={t.transfer_account_id ? accountById.get(t.transfer_account_id)?.name : undefined}
+                onDelete={() => {
+                  if (confirm('¿Borrar este movimiento?')) deleteTransaction.mutate(t.id)
+                }}
+              />
+            ))}
+          </div>
         )}
-        {filtered.map((t) => {
-          const category = t.category_id ? categoryById.get(t.category_id) : undefined
-          const account = accountById.get(t.account_id)
-          const transferAccount = t.transfer_account_id ? accountById.get(t.transfer_account_id) : undefined
-
-          const amountColor =
-            t.type === 'expense' ? 'text-negative' : t.type === 'income' ? 'text-positive' : 'text-white'
-          const sign = t.type === 'expense' ? '-' : t.type === 'income' ? '+' : ''
-
-          return (
-            <div key={t.id} className="flex items-center justify-between px-4 py-3">
-              <div className="flex flex-col">
-                <span className="text-sm text-white">
-                  {t.type === 'transfer'
-                    ? `${account?.name ?? '?'} → ${transferAccount?.name ?? '?'}`
-                    : (category?.name ?? 'Sin categoría')}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {formatDate(t.date)} · {account?.name ?? '?'}
-                  {t.note ? ` · ${t.note}` : ''}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-sm font-medium ${amountColor}`}>
-                  {sign}
-                  {formatCurrency(Number(t.amount))}
-                </span>
-                <button
-                  onClick={() => {
-                    if (confirm('¿Borrar este movimiento?')) {
-                      deleteTransaction.mutate(t.id)
-                    }
-                  }}
-                  aria-label="Borrar movimiento"
-                  className="text-gray-600 hover:text-negative"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+      </Card>
+    </>
   )
 }
