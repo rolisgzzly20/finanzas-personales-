@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PiggyBank, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import { DashboardHeader } from '../components/dashboard/DashboardHeader'
 import { StatCard } from '../components/dashboard/StatCard'
 import { DailySpendingChart } from '../components/dashboard/DailySpendingChart'
 import { SpendingFlow } from '../components/dashboard/SpendingFlow'
+import { AdjustBalancesSheet } from '../components/dashboard/AdjustBalancesSheet'
 import { useAccountBalances } from '../hooks/useAccountBalances'
 import { useMonthSummary } from '../hooks/useMonthSummary'
 import { useSavings } from '../hooks/useSavings'
@@ -15,6 +16,8 @@ export function DashboardPage() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
+  const [adjusting, setAdjusting] = useState(false)
+  const closeAdjust = useCallback(() => setAdjusting(false), [])
 
   const { data: accountBalances, isLoading: accountsLoading } = useAccountBalances()
   const { data: summary, isLoading: summaryLoading } = useMonthSummary(year, month)
@@ -57,13 +60,20 @@ export function DashboardPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatCard
-          label="Total disponible"
-          value={formatCurrency(totalAvailable)}
-          icon={Wallet}
-          color={COLORS.positive}
-          caption={`En ${spendable.length} cuentas`}
-        />
+        <button onClick={() => setAdjusting(true)} className="rounded-2xl text-left transition-opacity hover:opacity-85">
+          <StatCard
+            label="Total disponible"
+            value={formatCurrency(totalAvailable)}
+            icon={Wallet}
+            color={COLORS.positive}
+            valueClassName={totalAvailable < 0 ? 'text-negative' : 'text-white'}
+            caption={
+              <>
+                En {spendable.length} cuentas · <span className="text-accent">Ajustar</span>
+              </>
+            }
+          />
+        </button>
         <StatCard
           label="Gastado"
           value={formatCurrency(summary.spentThisMonth)}
@@ -110,6 +120,8 @@ export function DashboardPage() {
       />
 
       <DailySpendingChart year={year} month={month} daily={summary.dailySpending} />
+
+      {adjusting && <AdjustBalancesSheet onClose={closeAdjust} />}
     </>
   )
 }
