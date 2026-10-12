@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { LogOut, Plus, Wallet } from 'lucide-react'
+import { LogOut, Plus } from 'lucide-react'
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
 import { useAuth } from '../../context/AuthContext'
 import { useRealtimeTransactions } from '../../hooks/useRealtimeTransactions'
 import { AddTransactionSheet } from '../transactions/AddTransactionSheet'
+import { Logo } from '../ui/Logo'
 
 export function ProtectedLayout() {
   const { user, signOut } = useAuth()
@@ -20,9 +21,7 @@ export function ProtectedLayout() {
       <main className="min-w-0 flex-1 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-36 sm:px-6 lg:px-8 lg:pt-8 lg:pb-12">
         <div className="mb-5 flex items-center justify-between lg:hidden">
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-white">
-              <Wallet size={15} />
-            </span>
+            <Logo size={28} />
             <span className="font-semibold">Finanzas</span>
           </div>
           <button

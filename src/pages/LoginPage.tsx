@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { Logo } from '../components/ui/Logo'
 
 type Mode = 'signin' | 'magic-link'
 
@@ -41,6 +42,7 @@ export function LoginPage() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-bg px-4">
       <div className="w-full max-w-sm rounded-2xl bg-surface p-6">
+        <Logo size={48} className="mb-4 block" />
         <h1 className="mb-1 text-xl font-semibold text-white">Finanzas</h1>
         <p className="mb-6 text-sm text-gray-400">
           {mode === 'signin' ? 'Inicia sesión en tu cuenta' : 'Inicia sesión con un enlace mágico'}

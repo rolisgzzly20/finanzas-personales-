@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { LogOut, Wallet } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { Logo } from '../ui/Logo'
 import { NAV_ITEMS } from './nav'
 
 export function Sidebar() {
@@ -9,9 +10,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col bg-panel px-4 py-8 lg:flex">
       <div className="mb-10 flex items-center gap-2.5 px-3">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-white">
-          <Wallet size={17} />
-        </span>
+        <Logo size={32} />
         <span className="text-lg font-semibold text-white">Finanzas</span>
       </div>
 
